@@ -3,8 +3,8 @@
 Servo myservo;  // create servo object to control a servo
 // twelve servo objects can be created on most boards
 
-#define PWM_INPUT_PIN 3
-#define ESC_OUTPUT_PIN 2
+#define PWM_INPUT_PIN 2
+#define ESC_OUTPUT_PIN 3
 #define BUILTIN_LED 13
 
 #define INTEGRATE_STEP 5000
