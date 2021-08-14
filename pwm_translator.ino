@@ -7,9 +7,9 @@ Servo myservo;  // create servo object to control a servo
 #define ESC_OUTPUT_PIN 3
 #define BUILTIN_LED 13
 
-#define INTEGRATE_STEP 5000
-#define PWM_PROBE_DELAY 100
-#define SMOOTH_TICK 50
+// #define INTEGRATE_STEP 5000
+// #define PWM_PROBE_DELAY 100
+// #define SMOOTH_TICK 50
 
 volatile unsigned long fall_Time = 0;                   // Placeholder for microsecond time when last falling edge occured.
 volatile unsigned long rise_Time = 0;                   // Placeholder for microsecond time when last rising edge occured.
