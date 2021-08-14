@@ -21,7 +21,7 @@ volatile unsigned long rise_Time = 0;                   // Placeholder for micro
 volatile byte dutyCycle = 0;                            // Duty Cycle %
 volatile unsigned long lastRead = 0;
 
-unsigned long previousMillis = 0; 
+unsigned long previousMillis = 0;
 const long interval = 100;
 boolean tick = false;
 
@@ -30,13 +30,13 @@ void setup() {
   FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, BGR, DATA_RATE_MHZ(16)>(leds, NUM_LEDS);
   FastLED.clear();
   leds[0].green = BRIGHTNESS;
-  myservo.attach(ESC_OUTPUT_PIN);  // attaches the servo on pin 9 to the servo object
-  pinMode(13, OUTPUT); 
-  attachInterrupt(digitalPinToInterrupt(PWM_INPUT_PIN),PinChangeISR0,CHANGE);
+  myservo.attach(ESC_OUTPUT_PIN);                       // attaches the servo on pin 9 to the servo object
+  pinMode(13, OUTPUT);
+  attachInterrupt(digitalPinToInterrupt(PWM_INPUT_PIN), PinChangeISR0, CHANGE);
   dutyCycle = 10;
 }
 
-void PinChangeISR0(){                                   // Pin 2 (Interrupt 0) service routine
+void PinChangeISR0() {                                  // Pin 2 (Interrupt 0) service routine
   lastRead = micros();                                  // Get current time
   if (digitalRead(PWM_INPUT_PIN) == LOW) {
     // Falling edge
@@ -47,12 +47,12 @@ void PinChangeISR0(){                                   // Pin 2 (Interrupt 0) s
     unsigned long total_Time = rise_Time - lastRead;    // Get total cycle time
     unsigned long on_Time = fall_Time - rise_Time;      // Get on time during this cycle
     total_Time = total_Time / on_Time;                  // Divide it down
-    int newDutyCycle = 100 / total_Time;                       // Convert to a percentage
-    if(total_Time < 100){
-      if(newDutyCycle < dutyCycle){
+    int newDutyCycle = 100 / total_Time;                // Convert to a percentage
+    if (total_Time < 100) {
+      if (newDutyCycle < dutyCycle) {
         dutyCycle--;
       }
-      if(newDutyCycle > dutyCycle){
+      if (newDutyCycle > dutyCycle) {
         dutyCycle++;
       }
     }
@@ -109,22 +109,22 @@ void redSecondHalf(){
   }
 }
 
-void updateState(){
   FastLED.clear();
-  int fastPwm = 1000+dutyCycle*10;
-  long timeSinceLast = millis()-lastRead/1000;
-  Serial.print("timelast ");
+void updateState() {
+  int fastPwm = 1000 + dutyCycle*10;
+  long timeSinceLast = millis() - lastRead/1000;
+  Serial.print("timelast: ");
   Serial.println(timeSinceLast);
-  if(timeSinceLast > 1000 || timeSinceLast < 0){    
-     dutyCycle = 0;
-     fastPwm = -1;
+  if (timeSinceLast > 1000 || timeSinceLast < 0) {
+    dutyCycle = 0;
+    fastPwm = -1;
   }
 
   Serial.print("ESC: ");
   Serial.println(dutyCycle);
   tick = !tick;
-  digitalWrite(13, tick?HIGH:LOW); 
-  if(dutyCycle < 0 || dutyCycle > 100){
+  digitalWrite(13, tick?HIGH:LOW);
+  if (dutyCycle < 0 || dutyCycle > 100) {
     blueFull();
     return;
   }
@@ -145,22 +145,22 @@ void updateState(){
   }
   myservo.writeMicroseconds(fastPwm);
   //v is 0-1000
-  int promille = fastPwm-1000;
+  int promille = fastPwm - 1000;
   boolean high = false;
-  if(promille > 500){
+  if (promille > 500) {
     high = true;
-    promille = promille-500;
+    promille = promille - 500;
   }
-  int ledIncrement = 500/NUM_LEDS;
+  int ledIncrement = 500 / NUM_LEDS;
   int amountToLight = promille / ledIncrement;
   if(amountToLight  > NUM_LEDS){
     amountToLight = NUM_LEDS;
   }
   while(amountToLight > 0){
     if(high){
-      leds[amountToLight-1].blue = BRIGHTNESS;        
+      leds[amountToLight-1].blue = BRIGHTNESS;
     }
-    leds[amountToLight-1].green = BRIGHTNESS;        
+    leds[amountToLight-1].green = BRIGHTNESS;
     amountToLight--;
   }
 }
@@ -171,7 +171,5 @@ void loop() {
     previousMillis = currentMillis;
     updateState();
     FastLED.show();
-  } 
+  }
 }
-
-
