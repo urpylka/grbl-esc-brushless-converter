@@ -5,6 +5,8 @@ Servo myservo;  // create servo object to control a servo
 
 #define PWM_INPUT_PIN 3
 #define ESC_OUTPUT_PIN 2
+#define BUILTIN_LED 13
+
 #define INTEGRATE_STEP 5000
 #define PWM_PROBE_DELAY 100
 #define SMOOTH_TICK 50
@@ -20,8 +22,8 @@ boolean tick = false;
 
 void setup() {
   Serial.begin(115200);
-  myservo.attach(ESC_OUTPUT_PIN);                       // attaches the servo on pin 9 to the servo object
-  pinMode(13, OUTPUT);
+  myservo.attach(ESC_OUTPUT_PIN);  // attaches the servo on pin 9 to the servo object
+  pinMode(BUILTIN_LED, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(PWM_INPUT_PIN), PinChangeISR0, CHANGE);
   dutyCycle = 10;
 }
@@ -63,7 +65,7 @@ void updateState() {
   Serial.print("ESC: ");
   Serial.println(dutyCycle);
   tick = !tick;
-  digitalWrite(13, tick?HIGH:LOW);
+  digitalWrite(BUILTIN_LED, tick?HIGH:LOW);
 
   myservo.writeMicroseconds(fastPwm);
   //v is 0-1000
