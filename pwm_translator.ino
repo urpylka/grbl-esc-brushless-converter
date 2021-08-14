@@ -1,21 +1,14 @@
 #include <Servo.h>
-#include <FastLED.h>
 
 Servo myservo;  // create servo object to control a servo
 // twelve servo objects can be created on most boards
-
-#define DATA_PIN 5
-#define CLOCK_PIN 4
-#define NUM_LEDS 9
 
 #define PWM_INPUT_PIN 3
 #define ESC_OUTPUT_PIN 2
 #define INTEGRATE_STEP 5000
 #define PWM_PROBE_DELAY 100
 #define SMOOTH_TICK 50
-#define BRIGHTNESS 5
 
-CRGB leds[NUM_LEDS];
 volatile unsigned long fall_Time = 0;                   // Placeholder for microsecond time when last falling edge occured.
 volatile unsigned long rise_Time = 0;                   // Placeholder for microsecond time when last rising edge occured.
 volatile byte dutyCycle = 0;                            // Duty Cycle %
@@ -27,9 +20,6 @@ boolean tick = false;
 
 void setup() {
   Serial.begin(115200);
-  FastLED.addLeds<APA102, DATA_PIN, CLOCK_PIN, BGR, DATA_RATE_MHZ(16)>(leds, NUM_LEDS);
-  FastLED.clear();
-  leds[0].green = BRIGHTNESS;
   myservo.attach(ESC_OUTPUT_PIN);                       // attaches the servo on pin 9 to the servo object
   pinMode(13, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(PWM_INPUT_PIN), PinChangeISR0, CHANGE);
@@ -60,56 +50,6 @@ void PinChangeISR0() {                                  // Pin 2 (Interrupt 0) s
   }
 }
 
-void redFull(){
-  if(tick){
-    leds[0].red = BRIGHTNESS;
-    leds[1].red = BRIGHTNESS;
-    leds[2].red = BRIGHTNESS;
-    leds[3].red = BRIGHTNESS;
-    leds[4].red = BRIGHTNESS;
-    leds[5].red = BRIGHTNESS;
-    leds[6].red = BRIGHTNESS;
-    leds[7].red = BRIGHTNESS;
-    leds[8].red = BRIGHTNESS;
-  }
-}
-
-void blueFull(){
-  if(tick){
-    leds[0].blue = BRIGHTNESS;
-    leds[1].blue = BRIGHTNESS;
-    leds[2].blue = BRIGHTNESS;
-    leds[3].blue = BRIGHTNESS;
-    leds[4].blue = BRIGHTNESS;
-    leds[5].blue = BRIGHTNESS;
-    leds[6].blue = BRIGHTNESS;
-    leds[7].blue = BRIGHTNESS;
-    leds[8].blue = BRIGHTNESS;
-  }
-}
-
-
-void redFirstHalf(){
-  if(tick){
-    leds[0].red = BRIGHTNESS;
-    leds[1].red = BRIGHTNESS;
-    leds[2].red = BRIGHTNESS;
-    leds[3].red = BRIGHTNESS;
-    leds[4].red = BRIGHTNESS;
-  }
-}
-
-void redSecondHalf(){
-  if(tick){
-    leds[4].red = BRIGHTNESS;
-    leds[5].red = BRIGHTNESS;
-    leds[6].red = BRIGHTNESS;
-    leds[7].red = BRIGHTNESS;
-    leds[8].red = BRIGHTNESS;
-  }
-}
-
-  FastLED.clear();
 void updateState() {
   int fastPwm = 1000 + dutyCycle*10;
   long timeSinceLast = millis() - lastRead/1000;
@@ -124,25 +64,7 @@ void updateState() {
   Serial.println(dutyCycle);
   tick = !tick;
   digitalWrite(13, tick?HIGH:LOW);
-  if (dutyCycle < 0 || dutyCycle > 100) {
-    blueFull();
-    return;
-  }
 
-  if(fastPwm < 0){
-    redFull();
-    return;
-  }
-  if(fastPwm < 1000){
-    redFirstHalf();
-    myservo.writeMicroseconds(1000);
-    return;
-  }
-  if(fastPwm > 2000){
-    redSecondHalf();
-    myservo.writeMicroseconds(1000);
-    return;
-  }
   myservo.writeMicroseconds(fastPwm);
   //v is 0-1000
   int promille = fastPwm - 1000;
@@ -151,18 +73,6 @@ void updateState() {
     high = true;
     promille = promille - 500;
   }
-  int ledIncrement = 500 / NUM_LEDS;
-  int amountToLight = promille / ledIncrement;
-  if(amountToLight  > NUM_LEDS){
-    amountToLight = NUM_LEDS;
-  }
-  while(amountToLight > 0){
-    if(high){
-      leds[amountToLight-1].blue = BRIGHTNESS;
-    }
-    leds[amountToLight-1].green = BRIGHTNESS;
-    amountToLight--;
-  }
 }
 
 void loop() {
@@ -170,6 +80,5 @@ void loop() {
   if (currentMillis - previousMillis >= interval) {
     previousMillis = currentMillis;
     updateState();
-    FastLED.show();
   }
 }
